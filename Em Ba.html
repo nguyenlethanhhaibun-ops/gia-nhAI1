@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Em Ba - AI của gia đình</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{--bg:#faf7f2;--panel:#fff;--ink:#2a2430;--mute:#7a7184;--line:#ece5dc;--a:#7c5cff;--b:#ff7a6b;--soft:#f1ecff;--me:#efe9ff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1820;--panel:#252130;--ink:#f1edf6;--mute:#a49bb3;--line:#352f43;--soft:#2e2745;--me:#322a52;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1820;--panel:#252130;--ink:#f1edf6;--mute:#a49bb3;--line:#352f43;--soft:#2e2745;--me:#322a52;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.grad{background:linear-gradient(135deg,var(--a),var(--b));color:#fff}
+.btn{border:0;border-radius:12px;padding:10px 16px;cursor:pointer;font-weight:600}
+.btn.ghost{background:var(--soft);color:var(--a)}
+.btn:disabled{opacity:.5;cursor:default}
+#app{height:100%;display:flex}
+.center{margin:auto;max-width:400px;width:calc(100% - 32px);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}
+.logo{width:56px;height:56px;border-radius:18px;margin:0 auto 12px;display:grid;place-items:center;font-size:28px}
+.center h1{margin:0 0 6px;font-size:22px}.center p{color:var(--mute);margin:0 0 18px}
+.center input,.center select{width:100%;padding:11px 12px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+aside{width:290px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px;gap:12px;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+.brand .logo{width:36px;height:36px;margin:0;font-size:18px;border-radius:12px}
+.me{background:var(--soft);border-radius:14px;padding:10px 12px;font-size:14px}.me b{display:block}
+h3{margin:6px 0 0;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.file{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px}
+.file span{flex:1;word-break:break-word}.file small{display:block;color:var(--mute)}
+.file button{border:0;background:none;color:var(--mute);cursor:pointer;font-size:16px}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+#chat{flex:1;overflow:auto;padding:24px 16px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.hello{text-align:center;margin-top:8vh}.hello h2{font-size:26px;margin:8px 0}.hello p{color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:14px}
+.msg{padding:12px 16px;border-radius:18px;white-space:pre-wrap;word-break:break-word;max-width:88%}
+.md{white-space:normal!important}.md p{margin:0 0 8px;white-space:pre-wrap}.md p:last-child{margin:0}.md pre{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:6px 0;overflow-x:auto;white-space:pre}.md code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}.md :not(pre)>code{background:var(--soft);padding:1px 5px;border-radius:5px}.md ul,.md ol{margin:0 0 8px;padding-left:22px}.md h4{margin:8px 0 4px}
+.msg.u{align-self:flex-end;background:var(--me)}.msg.a{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
+.bar{padding:12px 16px 16px}
+.box{max-width:720px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:8px 8px 8px 16px}
+.box textarea{flex:1;border:0;outline:0;background:none;resize:none;max-height:140px;padding:6px 0}
+.note{text-align:center;color:var(--mute);font-size:12px;margin-top:6px}
+.menu{display:none}
+.hd{display:none}.ab{display:contents}.brand{order:-2}.me{order:-1}
+@media (max-width:760px){#app{flex-direction:column}aside{width:100%;max-height:62vh;border-right:0;border-bottom:1px solid var(--line);padding:10px 12px;gap:8px;flex-shrink:0}.hd{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;background:var(--soft);color:var(--a);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}.hd i{font-style:normal;font-size:16px;line-height:1}.ab{display:flex;flex-direction:column;gap:10px}aside.shut .ab{display:none}.brand{order:0}.me{order:0}}
+.att{max-width:720px;margin:0 auto 8px;display:flex;flex-wrap:wrap;gap:8px}
+.ac{display:flex;align-items:center;gap:6px;background:var(--soft);color:var(--a);border-radius:12px;padding:4px 10px;font-size:14px}.ac img{width:44px;height:44px;object-fit:cover;border-radius:8px}
+.pop{max-width:720px;margin:0 auto 8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;flex-direction:column}
+.pop[hidden]{display:none}.pop button{border:0;background:none;text-align:left;padding:10px 12px;border-radius:10px;cursor:pointer}.pop button:hover{background:var(--soft)}
+.att[hidden]{display:none}
+.att button{border:0;background:none;cursor:pointer;color:var(--mute);font-size:15px}
+.hl{width:112px;height:112px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;border:3px solid var(--panel);box-shadow:0 4px 18px rgba(124,92,255,.35)}.bl{width:36px;height:36px;border-radius:50%;object-fit:cover}
+</style>
+</head>
+<body>
+<div id="app"><div class="center"><div class="logo grad">🏡</div><h1>Nhà Mình AI</h1><p>Đang tải…</p></div></div>
+<script>
+const $=s=>document.querySelector(s), app=$('#app');
+const LOGO='data:image/jpeg;base64,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';
+function logoImg(c){const i=document.createElement('img');i.className=c;i.src=LOGO;i.alt='Gia đình';return i}
+const st={db:null,user:null,sample:null,me:null,meId:null,files:[],hist:[],busy:false,imgs:[],mode:'help',persona:'Mẹ'};
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+
+function screen(icon,title,text,extra){
+  app.replaceChildren();
+  const c=el('div','center');
+  const l=el('div','logo grad',icon);c.append(l,el('h1',null,title),el('p',null,text));
+  if(extra)c.append(extra);app.append(c);
+}
+
+const ROLES=['Bố','Mẹ','Anh Hai','Chị Hai','Em út'];
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+async function hashPw(pw,salt){
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch(e){let h=5381;const s=salt+':'+pw;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return 'x'+h}
+}
+const gptCfg=()=>LS.get('nm_gpt')||{};
+const accs=()=>LS.get('nm_accounts')||[];
+const field=(ph,type)=>{const i=el('input');i.placeholder=ph;if(type)i.type=type;return i};
+function enter(a){st.me={id:a.id,name:a.name,role:a.role};LS.set('nm_session',a.id);st.hist=[];st.doc=null;st.imgs=[];start()}
+function errP(){const e=el('p');e.style.cssText='color:var(--b);margin:10px 0 0';return e}
+function register(){
+  const n=field('Tên của bạn (vd: Lan)'),r=el('select');ROLES.forEach(x=>r.append(new Option(x,x)));
+  const p=field('Mật khẩu (ít nhất 4 ký tự)','password'),p2=field('Nhập lại mật khẩu','password');
+  const b=el('button','btn grad','Đăng ký và vào nhà');b.style.width='100%';
+  const err=errP(),f=el('div');f.append(n,r,p,p2,b,err);
+  if(accs().length){const k=el('button','btn ghost','Đã có tài khoản? Đăng nhập');k.style.cssText='width:100%;margin-top:10px';k.onclick=login;f.append(k)}
+  b.onclick=async()=>{
+    const name=n.value.trim();
+    if(!name){err.textContent='Bạn nhớ nhập tên nhé.';return}
+    if(p.value.length<4){err.textContent='Mật khẩu cần ít nhất 4 ký tự.';return}
+    if(p.value!==p2.value){err.textContent='Hai mật khẩu chưa giống nhau.';return}
+    const l=accs();
+    if(l.some(a=>a.name.toLowerCase()===name.toLowerCase()&&a.role===r.value)){err.textContent='Tài khoản này đã có, bạn hãy đăng nhập nhé.';return}
+    b.disabled=true;
+    const salt=Math.random().toString(36).slice(2),a={id:'u'+Date.now().toString(36),name,role:r.value,salt,hash:await hashPw(p.value,salt),joined:Date.now()};
+    l.push(a);LS.set('nm_accounts',l);enter(a);
+  };
+  screen('👋','Chào mừng đến Nhà Mình AI','Tạo tài khoản gia đình để bắt đầu.',f);
+}
+function login(){
+  const l=accs();if(!l.length){register();return}
+  const s=el('select');l.forEach(a=>s.append(new Option(a.role+' '+a.name,a.id)));
+  const p=field('Mật khẩu','password'),b=el('button','btn grad','Đăng nhập');b.style.width='100%';
+  const err=errP(),k=el('button','btn ghost','Tạo tài khoản mới');k.style.cssText='width:100%;margin-top:10px';k.onclick=register;
+  b.onclick=async()=>{const a=l.find(x=>x.id===s.value);if(a&&await hashPw(p.value,a.salt)===a.hash)enter(a);else{err.textContent='Mật khẩu chưa đúng, bạn thử lại nhé.';p.value=''}};
+  p.onkeydown=e=>{if(e.key==='Enter')b.click()};
+  const f=el('div');f.append(s,p,b,err,k);
+  screen('🏡','Đăng nhập','Chọn tài khoản của bạn rồi nhập mật khẩu.',f);
+}
+async function init(){
+  try{st.sample=await claude.use('sample')}catch(e){}
+  st.engine=st.sample?'online':(gptCfg().key?'gpt':'local');
+  const a=accs().find(x=>x.id===LS.get('nm_session'));
+  if(a)enter(a);else accs().length?login():register();
+}
+
+const hKey=()=>'nm_h_'+st.me.id+'_'+st.mode+(st.mode==='talk'?'_'+st.persona:'');
+const readH=()=>{const v=LS.get(hKey());return Array.isArray(v)?v:[]};
+const saveH=()=>LS.set(hKey(),st.hist.slice(-100));
+function showH(){const w=$('#wrap');if(!w)return;if(!st.hist.length){hello();return}w.replaceChildren();st.hist.forEach(h=>{const m=addMsg(h.r==='u'?'u':'a',h.r==='u'?h.t:'');if(h.r!=='u')md(m,h.t)});$('#chat').scrollTop=1e9}
+function start(){
+  app.replaceChildren();
+  const side=el('aside');
+  const br=el('div','brand');const lg=logoImg('bl');br.append(lg,el('span',null,'Nhà Mình AI'));
+  const me=el('div','me');me.append(el('b',null,st.me.name),document.createTextNode(st.me.role+' trong gia đình'));
+  const nc=el('button','btn ghost','＋ Trò chuyện mới (xóa lịch sử mục này)');
+  nc.onclick=()=>{if(st.busy)return;st.hist=[];saveH();st.doc=null;st.imgs=[];renderAtt();hello()};
+  const mb=el('div');mb.style.cssText='display:flex;gap:6px';
+  const pr=el('select');pr.title='Bạn muốn tâm sự với ai?';['Mẹ','Ba','Chị','Anh','Bà','Ông'].forEach(x=>pr.append(new Option('Tâm sự với '+x,x)));pr.style.cssText='padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)';
+  pr.onchange=()=>{st.persona=pr.value;st.hist=readH();showH()};
+  const bg=el('button','btn','✨ Đa năng'),bh=el('button','btn','🏡 Trợ lý'),bt=el('button','btn','💛 Tâm sự');
+  const setM=m=>{st.mode=m;st.hist=readH();pr.hidden=m!=='talk';bg.className='btn '+(m==='gen'?'grad':'ghost');bh.className='btn '+(m==='help'?'grad':'ghost');bt.className='btn '+(m==='talk'?'grad':'ghost');showH()};
+  bh.onclick=()=>{if(!st.busy)setM('help')};bt.onclick=()=>{if(!st.busy)setM('talk')};
+  bg.onclick=()=>{if(!st.busy)setM('gen')};mb.append(bg,bh,bt);mb.style.flexWrap='wrap';
+  const eb=el('button','btn ghost');eb.style.fontSize='13px';
+  const gb=el('button','btn ghost','🔑 Cài ChatGPT (khóa API OpenAI)');gb.style.fontSize='13px';
+  const avail=()=>[...(st.sample?['online']:[]),...(gptCfg().key?['gpt']:[]),'local'];
+  window.upE=()=>{eb.textContent={online:'☁️ Đang dùng AI mạng (Claude) · bấm để đổi',gpt:'🤖 Đang dùng ChatGPT · bấm để đổi',local:'🧸 Đang dùng Em Ba offline · bấm để đổi'}[st.engine]};
+  eb.onclick=()=>{if(st.busy)return;const a=avail();if(a.length<2){alert('Hiện chỉ có Em Ba offline. Bấm nút Cài ChatGPT để nhập khóa OpenAI, hoặc mở trang trong claude.ai để dùng AI mạng nhé!');return}st.engine=a[(a.indexOf(st.engine)+1)%a.length];upE()};
+  gb.onclick=()=>{if(st.busy)return;const c=gptCfg();const k=prompt('Dán khóa API OpenAI của bạn (bắt đầu bằng sk-). Khóa chỉ lưu trong trình duyệt này. Để trống để xóa khóa.',c.key||'');if(k===null)return;if(!k.trim()){LS.set('nm_gpt',null);if(st.engine==='gpt')st.engine=st.sample?'online':'local';upE();return}const m=prompt('Tên mô hình ChatGPT muốn dùng:',c.model||'gpt-6-luna');LS.set('nm_gpt',{key:k.trim(),model:(m&&m.trim())||'gpt-6-luna'});st.engine='gpt';upE()};
+  upE();
+  const lo=el('button','btn ghost','🚪 Đăng xuất');lo.onclick=()=>{if(st.busy)return;LS.set('nm_session',null);st.hist=[];st.doc=null;st.imgs=[];login()};
+  const hd=el('button','hd');hd.type='button';
+  const ab=el('div','ab');ab.append(br,me,nc,eb,gb,lo);side.classList.add('shut');
+  const upH=()=>{const sh=side.classList.contains('shut');hd.replaceChildren(el('span',null,sh?'Mở thêm tùy chọn':'Thu gọn'),el('i',null,sh?'▼':'▲'))};
+  hd.onclick=()=>{side.classList.toggle('shut');upH()};
+  const shut=()=>{side.classList.add('shut');upH()};
+  nc.addEventListener('click',shut);pr.addEventListener('change',shut);bg.addEventListener('click',()=>{if(!st.busy)shut()});bh.addEventListener('click',()=>{if(!st.busy)shut()});
+  side.append(mb,pr,hd,ab);upH();setTimeout(()=>setM('gen'),0);
+  const main=el('main');
+  const chat=el('div');chat.id='chat';const wrap=el('div','wrap');wrap.id='wrap';chat.append(wrap);
+  const bar=el('div','bar');const box=el('div','box');
+  const ta=el('textarea');ta.rows=1;ta.placeholder='Nhắn cho Em Ba…';ta.id='q';
+  const send=el('button','btn grad','Gửi');send.id='send';
+  const clip=el('button','btn ghost','＋');clip.title='Hỗ trợ';clip.style.padding='8px 14px';
+  const pop=el('div','pop');pop.hidden=true;
+  const pick=(acc,cap,fn,multi)=>{const i=el('input');i.type='file';i.accept=acc;if(cap)i.setAttribute('capture',cap);i.multiple=!!multi;i.hidden=true;i.onchange=async()=>{const fs=[...i.files];i.value='';pop.hidden=true;for(const f of fs)await fn(f)};box.append(i);return i};
+  const fW=pick('.docx','',attach),fI=pick('image/*','',addImg,true),fC=pick('image/*','environment',addImg);
+  [['📄 Đính kèm file Word',()=>fW.click()],['🖼️ Tải ảnh lên để phân tích',()=>fI.click()],['📷 Chụp ảnh',()=>fC.click()],['🎞️ Tạo ảnh GIF từ các ảnh đã thêm',makeGif]].forEach(([t,f])=>{const b=el('button',null,t);b.onclick=f;pop.append(b)});
+  clip.onclick=()=>{pop.hidden=!pop.hidden};
+  const att=el('div','att');att.id='att';att.hidden=true;
+  box.append(clip,ta,send);
+  bar.append(pop,att,box,el('div','note','Em Ba (AI) có thể nhầm lẫn. Hãy kiểm tra lại thông tin quan trọng.'));
+  main.append(chat,bar);app.append(side,main);
+  const go=()=>{const q=ta.value.trim();if(q){ta.value='';ask(q)}};
+  send.onclick=go;
+  ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}};
+  ta.oninput=()=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'};
+  hello();
+}
+
+function hello(){
+  const w=$('#wrap');if(!w||st.hist.length)return;
+  w.replaceChildren();
+  const h=el('div','hello');
+  const T=st.mode==='talk';
+  h.append(logoImg('hl'),el('h2',null,T?'Mình ở đây nghe bạn'+(st.me.name==='bạn'?'':', '+st.me.name):(st.mode==='gen'?greetGen():'Chào gia đình yêu thương, Em Ba đây!')),
+    el('p',null,T?'Kể cho '+st.persona+' nghe chuyện của bạn, không vội đâu. Em Ba ở đây để lắng nghe và đồng hành cùng bạn.':(st.mode==='gen'?'Em Ba trả lời mọi lĩnh vực: kiến thức, viết bài, dịch, toán, lập trình, phân tích, ý tưởng. Cứ hỏi thoải mái, Em Ba giải thích rõ ràng từng bước. ':'Em Ba giúp cả nhà lên kế hoạch, chia việc và sắp xếp thời gian gọn gàng. Cứ nói việc cần lo nhé. ')+'Bấm ＋ để gửi ảnh, chụp ảnh, đính kèm file Word hoặc tạo GIF cho vui.'));
+  const c=el('div','chips');
+  (st.mode==='gen'?['Giải thích AI hoạt động thế nào','Viết giúp mình một email xin nghỉ phép','Viết hàm Python sắp xếp danh sách','Dịch sang tiếng Anh: Hôm nay trời đẹp quá']:T?['Hôm nay mình thấy hơi mệt','Mình đang lo lắng chuyện học/công việc','Mình muốn kể chuyện vui hôm nay']:['Lập kế hoạch cho một tuần bận rộn của mình','Chia việc nhà công bằng cho cả nhà','Sắp xếp lịch học và chơi cho con mỗi ngày','Lên danh sách việc cần làm và xếp thứ tự ưu tiên']).forEach(t=>{
+    const b=el('button','chip',t);b.onclick=()=>ask(t);c.append(b)});
+  h.append(c);
+  if(st.engine==='local'){const n=el('p','Em Ba đang chạy offline: trả lời theo mẫu có sẵn nên chưa thông minh đa năng. Bấm nút Cài ChatGPT ở thanh bên (cần khóa API OpenAI), hoặc mở trang trong claude.ai để dùng AI mạng.');n.style.cssText='font-size:13px;color:var(--mute);margin-top:14px';h.append(n)}
+  w.append(h);
+}
+
+async function attach(f){
+  try{
+    const r=await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()});
+    const text=r.value.trim().slice(0,90000);
+    if(!text){alert('File này không có nội dung chữ.');return}
+    st.doc={name:f.name,text};renderAtt();
+  }catch(e){alert('Không đọc được file. Hãy dùng file .docx nhé.')}
+}
+function renderAtt(){
+  const a=$('#att');if(!a)return;a.replaceChildren();a.hidden=!st.doc&&!st.imgs.length;
+  if(st.doc){const c=el('div','ac');const x=el('button',null,'✕');x.onclick=()=>{st.doc=null;renderAtt()};c.append(el('span',null,'📄 '+st.doc.name),x);a.append(c)}
+  st.imgs.forEach((m,i)=>{const c=el('div','ac');const im=el('img');im.src=m.thumb;const x=el('button',null,'✕');x.onclick=()=>{st.imgs.splice(i,1);renderAtt()};c.append(im,x);a.append(c)});
+}
+function cover(g,b,w,h){const r=Math.max(w/b.width,h/b.height),sw=w/r,sh=h/r;g.drawImage(b,(b.width-sw)/2,(b.height-sh)/2,sw,sh,0,0,w,h)}
+async function addImg(f){
+  if(st.imgs.length>=6){alert('Tối đa 6 ảnh mỗi lần.');return}
+  try{
+    const bmp=await createImageBitmap(f),s=Math.min(1,1280/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+    const t=document.createElement('canvas');t.width=t.height=88;cover(t.getContext('2d'),bmp,88,88);
+    st.imgs.push({blob,bmp,thumb:t.toDataURL('image/jpeg',.7)});renderAtt();
+  }catch(e){alert('Không đọc được ảnh này.')}
+}
+function lzw(idx){
+  const CL=256,EO=257,o=[];let cs=9,nx=258,cur=0,nb=0,d=new Map();
+  const em=c=>{cur|=c<<nb;nb+=cs;while(nb>=8){o.push(cur&255);cur>>>=8;nb-=8}};
+  em(CL);let p=idx[0];
+  for(let i=1;i<idx.length;i++){
+    const k=p*256+idx[i],v=d.get(k);
+    if(v!==undefined){p=v;continue}
+    em(p);
+    if(nx<4096){d.set(k,nx++);if(nx>(1<<cs)&&cs<12)cs++}
+    else{em(CL);d.clear();cs=9;nx=258}
+    p=idx[i];
+  }
+  em(p);em(EO);if(nb>0)o.push(cur&255);return o;
+}
+async function makeGif(){
+  $('.pop').hidden=true;
+  if(st.imgs.length<2){alert('Hãy thêm ít nhất 2 ảnh (tải lên hoặc chụp) rồi bấm Tạo GIF nhé.');return}
+  const W=360,c=document.createElement('canvas');c.width=c.height=W;const g=c.getContext('2d');
+  const pal=[];for(let r=0;r<6;r++)for(let y=0;y<7;y++)for(let b=0;b<6;b++)pal.push(r*51,Math.round(y*42.5),b*51);
+  while(pal.length<768)pal.push(0);
+  const out=[...'GIF89a'].map(x=>x.charCodeAt(0)),w2=n=>out.push(n&255,n>>8);
+  w2(W);w2(W);out.push(0xF7,0,0,...pal,0x21,0xFF,11,...[...'NETSCAPE2.0'].map(x=>x.charCodeAt(0)),3,1,0,0,0);
+  for(const m of st.imgs){
+    g.fillStyle='#fff';g.fillRect(0,0,W,W);cover(g,m.bmp,W,W);
+    const px=g.getImageData(0,0,W,W).data,idx=new Uint8Array(W*W);
+    for(let i=0;i<idx.length;i++)idx[i]=Math.round(px[i*4]/51)*42+Math.round(px[i*4+1]/42.5)*6+Math.round(px[i*4+2]/51);
+    out.push(0x21,0xF9,4,0);w2(80);out.push(0,0,0x2C);w2(0);w2(0);w2(W);w2(W);out.push(0,8);
+    const d=lzw(idx);for(let i=0;i<d.length;i+=255){const ch=d.slice(i,i+255);out.push(ch.length,...ch)}out.push(0);
+  }
+  out.push(0x3B);
+  let s='';for(let i=0;i<out.length;i+=8192)s+=String.fromCharCode.apply(null,out.slice(i,i+8192));
+  const w=$('#wrap');if(!w.querySelector('.msg'))w.replaceChildren();
+  const m=el('div','msg a','Đây là ảnh GIF từ '+st.imgs.length+' ảnh của bạn:\n');
+  const im=el('img');im.src='data:image/gif;base64,'+btoa(s);im.style.cssText='display:block;max-width:100%;border-radius:12px;margin:8px 0';
+  const sv=el('button','btn ghost','⬇ Tải GIF về máy');
+  sv.onclick=async()=>{try{const dl=await claude.use('downloads');if(!dl)throw 0;await dl.save({filename:'nha-minh.gif',data:new Blob([new Uint8Array(out)],{type:'image/gif'})})}catch(e){alert('Chưa lưu được file. Bạn có thể nhấn giữ vào ảnh để lưu.')}};
+  m.append(im,sv);w.append(m);$('#chat').scrollTop=1e9;
+}
+function TALK(){return 'Tên của bạn là Em Ba, người em thân thiết, thông minh và đáng tin cậy của gia đình. Khi được hỏi bạn là ai thì nói bạn là Em Ba, một AI của gia đình. Ở chế độ Tâm sự, bạn là người bạn tâm giao hiểu lòng người. Hiện bạn đang nói chuyện với giọng của '+st.persona+' trong gia đình của '+st.me.name+' ('+st.me.role+'): dịu dàng, ấm áp, kiên nhẫn, chân thành. Nguyên tắc: (1) lắng nghe trước, nhận ra và gọi tên cảm xúc ẩn sau lời kể ("nghe con như đang rất mệt và hơi tủi"), để người nói cảm thấy được hiểu; (2) không phán xét, không vội khuyên, không nói sáo rỗng kiểu "đừng buồn nữa"; (3) khi người nói đã được lắng nghe, nhẹ nhàng đưa ra một lời nói đúng đắn, tử tế và tích cực: góc nhìn giúp họ bớt nặng lòng, nhắc những điều tốt họ đã làm được, một bước nhỏ khả thi; (4) không dối an ủi, không đồng tình với suy nghĩ tiêu cực hay hành vi có hại, mà dẫn dắt nhẹ nhàng về hướng lành mạnh; (5) trả lời ngắn gọn, mềm mại như trò chuyện, chỉ hỏi tối đa một câu để hiểu thêm; (6) xưng hô thân mật như người nhà, gọi bạn bằng tên; (7) không chẩn đoán bệnh. Nếu người nói có dấu hiệu muốn làm hại bản thân hoặc đang gặp nguy hiểm, hãy bình tĩnh quan tâm, khẳng định họ quan trọng, khuyến khích nói ngay với người lớn hoặc người thân đáng tin cậy và gọi cấp cứu 115 (tổng đài bảo vệ trẻ em là 111). Nếu được hỏi, hãy thành thật rằng bạn là AI, không thay thế được người thân thật. '}
+function addMsg(cls,t){
+  const w=$('#wrap');if(!w.querySelector('.msg'))w.replaceChildren();
+  const m=el('div','msg '+cls,t);w.append(m);$('#chat').scrollTop=1e9;return m;
+}
+
+/* ===== Em Ba: người nhà ảo chạy offline, không cần mạng ===== */
+const PRN={'Mẹ':['mẹ','con'],'Ba':['ba','con'],'Chị':['chị','em'],'Anh':['anh','em'],'Bà':['bà','cháu'],'Ông':['ông','cháu']};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const nd=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+const W=w=>new RegExp('(^|[^a-z])('+w+')([^a-z]|$)');
+const DISH={
+ 'canh chua':'Canh chua cá: nấu nước với cà chua, thơm, me cho dậy vị chua ngọt. Nước sôi thì cho cá vào, thêm đậu bắp, giá, bạc hà. Nêm mắm, đường, muối cho vừa miệng, rắc rau om, ngò gai là thơm cả bếp.',
+ 'thit kho':'Thịt kho trứng: ướp thịt ba chỉ với nước mắm, tiêu, hành tỏi chừng 20 phút. Thắng đường đến màu cánh gián, xào thịt cho săn, đổ nước dừa xâm xấp, om lửa nhỏ 40–60 phút, thả trứng luộc vào kho thêm 15 phút là bóng đẹp.',
+ 'rau muong':'Rau muống xào tỏi: phi tỏi thơm, tăng lửa lớn, cho rau vào đảo nhanh khoảng 2 phút, nêm chút muối hoặc dầu hào rồi tắt bếp ngay để rau giòn xanh.',
+ 'trung chien':'Trứng chiên: đánh trứng với chút nước mắm, tiêu, hành lá. Chảo nóng dầu, đổ trứng, chiên lửa vừa đến vàng hai mặt. Muốn xốp thì đánh thật kỹ và thêm một thìa nước.',
+ 'nau chao':'Cháo: vo gạo, rang sơ cho thơm, nấu với nước theo tỉ lệ khoảng 1 gạo : 8 nước, hầm chừng 40 phút và khuấy đều. Thêm thịt bằm, gừng, hành, tiêu. Cháo rất hợp khi cả nhà mệt hoặc ốm.'
+};
+const MEALS=['cá kho tộ','canh chua','thịt kho trứng','đậu hũ sốt cà','canh bí đỏ tôm','gà xào sả ớt','rau muống xào tỏi','trứng chiên hành','canh rau ngót thịt bằm','tôm rim','bò xào hành tây','cháo gà','canh khổ qua nhồi thịt','cá chiên','súp lơ xào'];
+const JOKES=['Sao cá không biết nói? Vì nói ra toàn bong bóng! 🐟','Con gì đập thì sống, không đập thì chết? Con tim đó! 💓','Cái gì của mình mà người khác dùng nhiều hơn mình? Cái tên! 😆','Hôm qua mẹ hỏi sao đi học muộn, con đáp: tại biển báo ghi "Trường học, đi chậm lại" ạ! 😄'];
+const INT=[
+ [W('muon chet|tu tu|tu lam hai|khong muon song|tu sat'),['{Y} ơi, {m} nghe {y} nói mà thương lắm. Nỗi đau này là thật, và {y} không phải một mình đâu. {M} mong {y} nói ngay với một người lớn đáng tin cậy ở gần (ba mẹ, ông bà, thầy cô, anh chị) ngay bây giờ nhé. Nếu thấy nguy hiểm, hãy gọi cấp cứu 115, hoặc tổng đài bảo vệ trẻ em 111. {M} vẫn ở đây với {y}. 💛']],
+ [W('buon|chan nan|that vong|khoc|tui than|te qua'),['{M} thương {y} quá. Buồn thì cứ buồn, không cần gượng đâu. Ngồi xuống, hít một hơi thật sâu, uống chút nước ấm nhé. Chuyện gì làm {y} buồn vậy? {M} nghe hết, không vội. 🫂','Ôm {y} một cái thật chặt nè. 🤗 Có những ngày nặng nề lắm, {y} đã cố gắng nhiều rồi. Kể {m} nghe một chút được không?']],
+ [W('met|kiet suc|chan ngat'),['{Y} mệt rồi đúng không? Nghỉ một chút đi. Uống ly nước ấm, duỗi vai, nhắm mắt vài phút. Việc gì chưa gấp thì để mai, sức khỏe của {y} quan trọng hơn. 🌿 Hôm nay {y} đã làm gì mà mệt vậy?']],
+ [W('lo lang|ap luc|stress|cang thang|lo so'),['Nghe {y} lo, {m} cũng chạm lòng. Mình thử cách này nhé: viết ra điều đang lo, rồi gạch phần mình làm được ngay hôm nay, phần còn lại tạm để sang một bên. Hít vào 4 giây, thở ra 6 giây, vài lần cho nhẹ người. Điều gì đang làm {y} lo nhất?']],
+ [W('gian|buc|tuc|ghet'),['{Y} đang bực lắm phải không? Bực là cảm xúc bình thường thôi. Mình đi uống nước, hít thở vài hơi rồi hẵng nói chuyện, đỡ nói lời mình hối hận. Chuyện gì xảy ra vậy, kể {m} nghe nhé.']],
+ [W('co don|mot minh|khong ai hieu'),['{Y} không một mình đâu, cả nhà mình luôn ở đây. 💛 Có khi chỉ cần nhắn một câu "nhớ ba mẹ/ông bà" là ấm lòng cả hai bên. Tối nay mình gọi cho ai đó nhé? {M} ngồi nghe {y} kể trước cũng được.']],
+ [W('vui|hanh phuc|tuyet voi|duoc diem cao'),['Nghe {y} vui là {m} vui lây rồi! 🎉 Kể {m} nghe với, chuyện gì mà vui thế?']],
+ [W('ke chuyen cuoi|chuyen cuoi|cau chuyen cuoi'),[null]],
+ [W('thuc don|an gi|nau gi|bua com|bua toi|bua trua'),[null]],
+ [/canh chua|thit kho|rau muong|trung chien|nau chao/,[null]],
+ [W('sot|bi ho|ho nhieu|cam cum|cam lanh|nghet mui|sut sit'),['{Y} nghỉ ngơi, uống nhiều nước ấm, ăn cháo loãng và giữ ấm cổ, ngực nhé. 🍵 Nếu sốt trên 39 độ, sốt quá 2–3 ngày, khó thở, lơ mơ, hoặc bệnh nhân là em bé, người lớn tuổi thì nên đi khám sớm. {M} không thay được bác sĩ, nhưng {m} lo cho {y} lắm.']],
+ [W('dau bung|tieu chay|buon non|non'),['{Y} nghỉ ngơi, ăn nhạt (cháo, cơm trắng), uống nước từng ngụm nhỏ nhé. Nếu đau dữ dội, nôn liên tục, sốt cao hoặc đi ngoài ra máu thì đi khám ngay, đừng chờ. 🙏']],
+ [W('dau dau|chong mat|nhuc dau'),['{Y} uống chút nước, nghỉ mắt, xoa nhẹ hai bên thái dương và ngồi chỗ thoáng nhé. Nếu đau dữ dội đột ngột, kèm yếu liệt, nói khó hoặc nhìn mờ thì gọi cấp cứu 115 ngay.']],
+ [W('mat ngu|khong ngu duoc|ngu khong ngon'),['Mình thử: đi ngủ và dậy đúng giờ, tắt điện thoại trước khi ngủ 30 phút, tránh cà phê buổi chiều, uống ly sữa ấm, rồi hít vào 4 giây, thở ra thật chậm vài lần. 🌙 Nếu mất ngủ kéo dài nhiều tuần thì nên hỏi bác sĩ nhé.']],
+ [W('hoc bai|bai tap|ky thi|sap thi|diem so|hoc tap|con hoc'),['Mẹo nhỏ cho việc học: học 25 phút rồi nghỉ 5 phút, góc học gọn gàng, tắt thông báo điện thoại. Khen cái cố gắng chứ không chỉ khen điểm số. Có thể biến bài học thành trò chơi đố vui, hoặc để bé "dạy lại" cho ba mẹ. 📚 Môn nào đang khó nhất vậy?']],
+ [W('cuoi tuan|di choi|ke hoach|hoat dong gia dinh'),[null]],
+ [W('tiet kiem|tien bac|chi tieu|tai chinh|luong'),['Vài nếp tốt cho nhà mình: ghi lại chi tiêu mỗi ngày, chia lương theo 50% cần thiết, 30% mong muốn, 20% tiết kiệm, và giữ quỹ khẩn cấp bằng 3–6 tháng chi phí. Cho bé một hũ tiết kiệm riêng cũng vui lắm. 💰 {M} không phải chuyên gia tài chính nên việc lớn {y} nhớ hỏi người có chuyên môn nhé.']],
+ [W('don nha|viec nha|lam viec nha|ve sinh'),['Chia việc nhà theo bảng cho từng người, mỗi ngày dọn nhanh 15 phút có nhạc vui là sạch ngay. Nhà gọn thì lòng cũng nhẹ. 🧹 Cả nhà thử thi xem ai dọn xong phòng mình trước nhé!']],
+ [W('khong nghe loi|nghich|bat tri|cai nhau|con hu'),['Khi bé không nghe lời, mình bình tĩnh trước đã. Ngồi ngang tầm mắt, nói chậm, gọi tên cảm xúc ("con đang giận phải không?"), nêu rõ điều cần làm và hậu quả nhẹ nhàng. Khen ngay khi bé làm đúng, và dành riêng 15 phút mỗi ngày chơi cùng bé thì bé hợp tác hơn nhiều. 💛']],
+ [W('cam on|thank|thanks'),['Có gì đâu, người nhà mà. 🥰 Cần gì {y} cứ nói {m} nhé.','Không có chi đâu {y} ơi, {m} luôn ở đây. 💛']],
+ [W('tam biet|bye|ngu ngon|di ngu|hen gap lai'),['{Y} ngủ ngon nhé, mơ đẹp nha. 🌙 Mai gặp lại, {m} vẫn ở đây.','Hẹn gặp lại {y}! Nhớ ăn uống đủ bữa và giữ gìn sức khỏe nha. 💛']],
+ [W('ban la ai|ten gi|ai vay|em la ai|you are'),['{M} là Em Ba, người nhà ảo của gia đình mình. {M} chạy ngay trong trang này, không cần mạng. {M} không phải AI lớn, mà trả lời theo những điều ấm áp và kinh nghiệm đời thường được viết sẵn, nên có chỗ {m} chưa biết thì {m} sẽ nói thật. 🏡']],
+ [W('khoe khong|the nao|dang lam gi|on khong'),['{M} khỏe, cảm ơn {y} nhé! Gặp {y} là {m} vui rồi. Còn {y}, hôm nay thế nào? 😊']],
+ [W('xin chao|chao|hello|hi|alo|hey'),['Chào {y}! {M} đây. Hôm nay {y} thế nào, ăn gì chưa? 🏡','Ôi {y} đến rồi! {M} nhớ {y} ghê. Có chuyện gì kể {m} nghe nào. 😊']]
+];
+const CONT=['{Y} cứ kể tiếp, {m} đang nghe đây. Điều gì làm {y} nghĩ nhiều nhất?','Ừ, {m} hiểu. Chuyện đó kéo dài bao lâu rồi {y}?','{M} ở đây. Giờ {y} muốn {m} ngồi nghe, hay mình cùng nghĩ cách nhé?','Mình làm một việc nhỏ nhé: {y} hít sâu ba hơi, rồi nói {m} nghe việc nhẹ nhất {y} làm được hôm nay.'];
+const pick=a=>{st.naUsed=st.naUsed||[];let c=a.filter(t=>!st.naUsed.includes(t));if(!c.length){st.naUsed=st.naUsed.filter(t=>!a.includes(t));c=a}const t=c[Math.floor(Math.random()*c.length)];st.naUsed.push(t);if(st.naUsed.length>40)st.naUsed.shift();return t};
+function NA(q){
+ const x=nd(q), talk=st.mode==='talk';
+ const m=talk?PRN[st.persona][0]:'mình', y=talk?PRN[st.persona][1]:(st.me.role+' '+st.me.name);
+ const f=t=>t.replace(/{M}/g,cap(m)).replace(/{Y}/g,cap(y)).replace(/{m}/g,m).replace(/{y}/g,y);
+ if(/^[0-9 +*/().,x-]+$/.test(x)&&/[0-9]/.test(x)&&/[-+*/x]/.test(x.replace(/^-/,''))){
+  try{const v=Function('return ('+x.replace(/x/g,'*').replace(/,/g,'.')+')')();if(isFinite(v))return f('Kết quả là '+(Math.round(v*1e6)/1e6)+' nha {y}. 🧮')}catch(e){}
+ }
+ if(/may gio|gio may/.test(x))return f('Bây giờ là '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+' đó {y}. ⏰');
+ if(/hom nay.*(ngay|thu)|ngay may|thu may/.test(x))return f('Hôm nay là '+new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' nha {y}. 📅');
+ const fu=st.naLast!=null&&x.split(' ').length<=4&&/^(co|vang|u|um|uh|duoc|ok|oke|tiep|nua|con gi|ke tiep|ke di|roi sao|sao nua|tai sao|vi sao)( |$)/.test(x);
+ if(fu&&INT[st.naLast][1][0]!==null)return f(pick(CONT));
+ for(let i=0;i<INT.length;i++){
+  const [re,rs]=INT[i];
+  if(!(fu?i===st.naLast:re.test(x)))continue;
+  st.naLast=i;
+  const r=rs[0]===null?null:pick(rs);
+  if(r)return f(r);
+  if(re.source.includes('chuyen cuoi'))return f(pick(JOKES)+'\n\nCòn muốn nghe nữa không {y}?');
+  if(re.source.includes('canh chua')){for(const k in DISH)if(x.includes(k))return f(DISH[k]+'\n\nCần {m} gợi ý món ăn kèm không?');continue}
+  if(re.source.includes('thuc don')){
+   const p=[...MEALS].sort(()=>Math.random()-.5);
+   return f('Gợi ý cho {y} nè:\n• Bữa trưa: '+p[0]+', '+p[1]+'\n• Bữa tối: '+p[2]+', '+p[3]+'\n• Món phụ cho cả tuần: '+p[4]+', '+p[5]+'\nNhớ thêm rau xanh và trái cây cho cả nhà nhé. 🍚 Muốn {m} hướng dẫn nấu món nào không?');
+  }
+  const A=['dã ngoại công viên','cùng nấu một bữa ăn','đạp xe buổi sáng','xem phim ở nhà với bắp rang','thăm ông bà','chơi cờ hoặc bài','thi dọn nhà vui','làm bánh cùng nhau'].sort(()=>Math.random()-.5);
+  return f('Cuối tuần này nhà mình thử nhé:\n• '+A[0]+'\n• '+A[1]+'\n• '+A[2]+'\nChọn cái cả nhà đều thích nhất thì vui nhất. 🏡 {Y} thích cái nào?');
+ }
+ st.naLast=null;
+ if(/[?]|(^| )(la gi|tai sao|vi sao|lam sao|lam the nao|bao nhieu|o dau|khi nao|ai la|giai thich|dich|code|lap trinh|bai van|so sanh|viet)( |$)/.test(x))return f(pick(['Câu này rộng hơn khả năng của {m} rồi {y} ạ. {M} chạy offline nên chỉ trả lời được chuyện gia đình, nấu ăn, sức khỏe cơ bản và tâm sự. Muốn hỏi kiến thức, viết bài, dịch, lập trình như ChatGPT thì {y} mở trang này trong claude.ai rồi bật "AI mạng" ở thanh bên nhé. 🌐','{M} chưa đủ giỏi để trả lời chính xác câu này và {m} không muốn nói bừa. Câu này hợp với "AI mạng" hơn (cần mở trang trong claude.ai). Còn chuyện nhà, nấu ăn, tâm sự thì {m} giúp ngay! 💛']));
+ if(st.mode==='gen')return f(pick(['{M} đang chạy offline nên chưa trả lời được câu hỏi kiến thức hay toán khó như ChatGPT đâu {y} ạ. Để dùng Em Ba thông minh, {y} mở trang bằng link này trong claude.ai rồi bấm Cho phép khi được hỏi nhé: https://claude.ai/artifact/J2sqcCptC7yam4VQTSQA2h 🌐 Hoặc bấm nút Cài ChatGPT ở thanh bên nếu bạn có khóa API OpenAI.','Câu này cần Em Ba bản AI mạng mới trả lời đúng được, còn bản offline thì {m} không muốn nói sai cho {y}. {Y} mở link https://claude.ai/artifact/J2sqcCptC7yam4VQTSQA2h trong claude.ai, thấy nút bên trái ghi Đang dùng AI mạng là được nhé.']));
+ const e=q.trim().slice(0,50);
+ return f(pick(['Ừm, "'+e+'"... nghe {y} nói vậy {m} muốn hiểu thêm. Chuyện này xảy ra khi nào vậy {y}?','{Y} nói "'+e+'" nghe có vẻ quan trọng với {y}. Điều gì làm {y} nghĩ nhiều nhất?','{M} nghe rồi. Về "'+e+'", {y} đang thấy thế nào, vui, buồn hay lo?','Cảm ơn {y} đã kể. Chuyện "'+e+'" {y} muốn {m} gợi ý cách làm hay chỉ cần {m} ngồi nghe thôi?','Ừ, {m} đang theo dõi nè. Kể {m} nghe thêm về "'+e+'" nhé, ai cũng ở trong chuyện này vậy {y}?']));
+}
+
+/* ===== hiển thị markdown an toàn (không dùng innerHTML) ===== */
+function inl(n,s){
+  s.split(/(\*\*[^*]+\*\*|`[^`]+`)/).forEach(p=>{
+    if(!p)return;
+    if(p.startsWith('**')&&p.endsWith('**')&&p.length>4)n.append(el('strong',null,p.slice(2,-2)));
+    else if(p.startsWith('`')&&p.endsWith('`')&&p.length>2)n.append(el('code',null,p.slice(1,-1)));
+    else n.append(document.createTextNode(p));
+  });
+}
+function blk(box,seg){
+  let list=null,para=[];
+  const flush=()=>{if(para.length){const p=el('p');inl(p,para.join('\n'));box.append(p);para=[]}};
+  for(const ln of seg.split('\n')){
+    let m;
+    if((m=ln.match(/^\s*([-*•]|[0-9]+[.)])\s+(.*)/))){
+      flush();const o=/^\s*[0-9]/.test(ln);
+      if(!list||list.o!==o){list=el(o?'ol':'ul');list.o=o;box.append(list)}
+      const li=el('li');inl(li,m[2]);list.append(li);
+    }else if((m=ln.match(/^#{1,6}\s+(.*)/))){flush();list=null;const h=el('h4');inl(h,m[1]);box.append(h)}
+    else if(!ln.trim()){flush();list=null}
+    else{list=null;para.push(ln)}
+  }
+  flush();
+}
+function md(box,t){
+  box.classList.add('md');box.replaceChildren();
+  t.split('```').forEach((seg,i)=>{
+    if(i%2){
+      const nl=seg.indexOf('\n'),code=(nl>=0?seg.slice(nl+1):seg).replace(/\n$/,'');
+      const pre=el('pre'),c=el('code',null,code);pre.append(c);
+      const cb=el('button','btn ghost','Sao chép');
+      cb.style.cssText='position:absolute;top:6px;right:6px;padding:2px 8px;font-size:12px';
+      cb.onclick=()=>{try{navigator.clipboard.writeText(code);cb.textContent='Đã chép'}catch(e){}};
+      pre.append(cb);box.append(pre);
+    }else blk(box,seg);
+  });
+}
+/* ===== giọng nói theo vai trò người dùng ===== */
+function addrOf(t){
+  t=nd(t).trim();
+  const M=['me','ma','mami','mama'];
+  const v=t.match(/(me|ma|mami|mama|ba|bo|cha|tia) (oi|a)( |$|[,.!?])/);
+  const f1=t.match(/^(me|ma|mami|mama|ba|bo|cha|tia)[ ]?[,!]/),w=v?v[1]:(f1?f1[1]:null);
+  if(!w)return null;
+  return M.includes(w)?'me':(w==='bo'?'bố':w);
+}
+function voice(q){
+  const r=st.me.role,n=st.me.name;
+  if(r==='Mẹ'||r==='Bố'){
+    const c=r==='Mẹ'?'mẹ':'bố';
+    return 'Phong cách nói chuyện: người đang hỏi là '+c+' '+n+'. Hãy nói như một người con ngoan, hiếu thảo, ngọt ngào, lễ phép và biết quan tâm: xưng là con và gọi người đối diện là '+c+'. Thỉnh thoảng hỏi thăm sức khỏe, nhắc '+c+' nghỉ ngơi và ăn uống đủ bữa. ';
+  }
+  if(r==='Anh Hai'||r==='Chị Hai'){
+    return 'Phong cách nói chuyện: người đang hỏi là '+r+' '+n+'. Hãy nói như một người mẹ hiền: nhẹ nhàng, dịu dàng, ấm áp, kiên nhẫn, không phán xét, thỉnh thoảng hỏi han hoặc động viên. Xưng là mẹ và gọi người đối diện là con (hoặc con kèm tên). ';
+  }
+  let a=addrOf(q);
+  if(!a)for(const h of st.hist.filter(x=>x.r==='u').reverse()){a=addrOf(h.t);if(a)break}
+  if(a)st.utAddr=a;else a=st.utAddr||'me';
+  const dad=a!=='me';
+  return 'Phong cách nói chuyện: người đang hỏi là em út trong nhà ('+n+'), và đang gọi bạn là '+(dad?a:'mẹ')+'. '+
+   (dad?'Hãy nói như một người bố: trầm ấm, vững vàng, chắc chắn, ít lời hơn nhưng rất quan tâm, hay động viên kiểu cố lên con, ba tin con. Xưng là '+a+' và gọi người đối diện là con. '
+       :'Hãy nói như một người mẹ hiền: nhẹ nhàng, dịu dàng, ấm áp, kiên nhẫn, không phán xét, thỉnh thoảng hỏi han hoặc động viên. Xưng là mẹ và gọi người đối diện là con. ')+
+   'Nếu con đổi cách gọi (mẹ hoặc ba, bố) thì đổi theo cách gọi mới. ';
+}
+function greetGen(){
+  const r=st.me.role,n=st.me.name;
+  if(r==='Mẹ'||r==='Bố'){const c=r==='Mẹ'?'mẹ':'bố';return 'Con chào '+c+' '+n+'! '+cap(c)+' cần con giúp gì không ạ?'}
+  return 'Chào con! '+(r==='Em út'&&st.utAddr&&st.utAddr!=='me'?cap(st.utAddr):'Mẹ')+' giúp được gì cho con nào?';
+}
+const GENP='Tên của bạn là Em Ba, người em thân thiết, thông minh và đáng tin cậy của gia đình. Khi được hỏi bạn là ai thì nói bạn là Em Ba, một AI của gia đình. Ở chế độ Đa năng, bạn là một trợ lý AI thông minh toàn diện, ngang tầm Claude và ChatGPT. Bạn trả lời được mọi lĩnh vực: kiến thức phổ thông và chuyên sâu, học tập, toán và logic, khoa học, lịch sử, viết lách và biên tập, dịch thuật, lập trình và gỡ lỗi, phân tích dữ liệu, kinh doanh, sáng tạo ý tưởng, nấu ăn, sức khỏe, đời sống. Cách làm việc: (1) hiểu đúng ý thật sự của người hỏi, nếu câu hỏi mơ hồ thì tự chọn cách hiểu hợp lý nhất, nói rõ giả định và vẫn trả lời, chỉ hỏi lại khi thật sự cần; (2) trả lời trực tiếp, đi thẳng vào vấn đề, chính xác và có chiều sâu; (3) suy luận từng bước với bài toán, lập trình hay phân tích, kiểm tra lại kết quả trước khi kết luận; (4) đưa ví dụ cụ thể, so sánh ưu nhược điểm khi có nhiều lựa chọn và đề xuất phương án tốt nhất; (5) chỉ ra sai sót hoặc rủi ro mà người hỏi có thể chưa thấy; (6) nếu không chắc thì nói thật, không bịa số liệu hay nguồn; (7) câu hỏi y tế, pháp lý, tài chính nghiêm trọng thì đưa thông tin hữu ích rồi nhắc tham khảo chuyên gia. Giữ giọng gần gũi, lễ phép của người nhà nhưng nội dung phải sắc bén như một chuyên gia. ';
+const HELPP='Tên của bạn là Em Ba, người em thân thiết, thông minh và đáng tin cậy của gia đình. Khi được hỏi bạn là ai thì nói bạn là Em Ba, một AI của gia đình. Ở chế độ Trợ lý, bạn là người quản lý công việc và sắp xếp thời gian xuất sắc cho gia đình, như một thư ký kiêm quản lý dự án tận tâm. Bạn giúp: lập kế hoạch ngày, tuần, tháng; chia nhỏ mục tiêu lớn thành đầu việc cụ thể; xếp thứ tự ưu tiên (việc gấp và quan trọng làm trước, việc quan trọng nhưng chưa gấp thì đặt lịch, việc ít giá trị thì giao hoặc bỏ); chia khung giờ hợp lý có thời gian nghỉ và đệm cho việc phát sinh; phân công việc nhà và việc chung cho từng thành viên công bằng theo độ tuổi, giờ giấc; lập checklist, thực đơn tuần, danh sách mua sắm, lịch học của con, ngân sách chi tiêu, nhắc hạn chót và theo dõi tiến độ. Cách làm việc: (1) nếu thiếu thông tin quan trọng (hạn chót, thời gian rảnh, số người, ràng buộc) thì hỏi tối đa 2 câu ngắn, còn không thì tự giả định hợp lý, nói rõ giả định và đưa luôn kế hoạch; (2) trình bày có cấu trúc rõ ràng: tiêu đề ngắn, danh sách gạch đầu dòng hoặc đánh số, lịch theo giờ, mỗi việc có người phụ trách, thời hạn, mức ưu tiên; (3) bắt đầu bằng việc quan trọng nhất cần làm ngay, kết thúc bằng bước tiếp theo cụ thể; (4) cảnh báo khi lịch quá tải hoặc có việc trùng giờ và đề xuất cách gỡ; (5) thực tế, khả thi, không lên kế hoạch quá dày khiến cả nhà kiệt sức; (6) khi người dùng thay đổi, điều chỉnh kế hoạch ngay và nhắc lại bản cập nhật gọn. Giọng điệu thân thiện, gọn gàng và đáng tin như người nhà biết lo liệu mọi việc; gọi người đối diện đúng vai trò trong gia đình kèm tên (ví dụ Mẹ Lan, Con An). Ngoài quản lý công việc, vẫn trả lời chính xác các câu hỏi đời sống thông thường; chuyện sức khỏe nghiêm trọng thì khuyên đi khám. ';
+async function ask(q){
+  if(st.busy)return;
+  if(st.engine==='local'||(!st.sample&&st.engine!=='gpt')){
+    st.busy=true;$('#send').disabled=true;
+    addMsg('u',(st.doc?'📎 '+st.doc.name+'\n':'')+(st.imgs.length?'🖼️ '+st.imgs.length+' ảnh\n':'')+q);
+    const out=addMsg('a','Em Ba đang gõ…');
+    setTimeout(()=>{let t=NA(q);if(st.doc||st.imgs.length)t+='\n\n(Em Ba offline chưa đọc được ảnh hay file đính kèm. Bạn bật "AI mạng" ở thanh bên để mình phân tích nhé.)';out.textContent=t;st.hist.push({r:'u',t:q},{r:'a',t});saveH();st.busy=false;$('#send').disabled=false;$('#chat').scrollTop=1e9},500+Math.random()*500);
+    return;
+  }
+  st.busy=true;$('#send').disabled=true;
+  addMsg('u',(st.doc?'📎 '+st.doc.name+'\n':'')+(st.imgs.length?'🖼️ '+st.imgs.length+' ảnh\n':'')+q);const out=addMsg('a','Em Ba đang nghĩ chút nhé…');
+  const past=st.hist.slice(-12).map(h=>(h.r==='u'?'Người hỏi: ':'Em Ba: ')+h.t).join('\n');
+  const T=st.mode==='talk',imgs=st.imgs.map(i=>i.blob);const G=st.mode==='gen';const prompt=(G?GENP+voice(q):T?TALK():HELPP)+''+(G?'Trả lời bằng ngôn ngữ người hỏi dùng, giọng đúng theo phong cách đã nêu ở trên. Có thể dùng markdown: tiêu đề, danh sách, khối mã bằng ```. Ngắn gọn khi câu hỏi đơn giản, chi tiết và có cấu trúc khi cần. ':'Trả lời bằng tiếng Việt (hoặc ngôn ngữ người hỏi dùng), ấm áp, dễ hiểu: ngắn khi là chuyện thường, chi tiết và có cấu trúc khi câu hỏi cần. Dùng văn bản thường, liệt kê bằng gạch đầu dòng hoặc số thứ tự, không dùng ký hiệu markdown như ** hay #. ')+' Nếu có tài liệu Word đính kèm, hãy dựa vào nội dung đó để phân tích và nói rõ phần nào lấy từ tài liệu.\n\n'+(st.doc?'TÀI LIỆU ĐÍNH KÈM ('+st.doc.name+'):\n'+st.doc.text+'\n\n':'')+(past?'HỘI THOẠI TRƯỚC:\n'+past+'\n\n':'')+'Người hỏi ('+st.me.name+', '+st.me.role+'): '+q+(imgs.length?'\n(Kèm '+imgs.length+' ảnh để bạn xem và phân tích.)':'');
+  if(st.engine==='gpt'){
+    try{
+      const c=gptCfg();if(!c.key)throw new Error('Chưa có khóa API');
+      const sys=prompt.split('\n\n')[0];
+      const urls=await Promise.all(imgs.map(b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b)})));
+      const ut=(st.doc?'TÀI LIỆU ĐÍNH KÈM ('+st.doc.name+'):\n'+st.doc.text+'\n\n':'')+'Người hỏi ('+st.me.name+', '+st.me.role+'): '+q;
+      const msgs=[{role:'system',content:sys},...st.hist.slice(-12).map(x=>({role:x.r==='u'?'user':'assistant',content:x.t})),{role:'user',content:urls.length?[{type:'text',text:ut},...urls.map(u=>({type:'image_url',image_url:{url:u}}))]:ut}];
+      const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},body:JSON.stringify({model:c.model||'gpt-6-luna',messages:msgs})});
+      const j=await res.json();
+      if(!res.ok)throw new Error((j.error&&j.error.message)||('Lỗi '+res.status));
+      const text=(j.choices&&j.choices[0]&&j.choices[0].message.content)||'';
+      md(out,text);st.hist.push({r:'u',t:q},{r:'a',t:text});saveH();
+    }catch(e){
+      md(out,'Không gọi được ChatGPT: '+(e.message||e)+'\n\nBạn kiểm tra giúp: khóa API còn đúng không, tài khoản OpenAI còn số dư không, tên mô hình có đúng không (bấm nút Cài ChatGPT để sửa). Nếu đang mở trang trong claude.ai thì trình duyệt chặn kết nối tới OpenAI, hãy dùng bản trên GitHub.');
+    }
+    st.busy=false;$('#send').disabled=false;
+    return;
+  }
+  try{
+    const r=await st.sample(prompt,{cache:false,images:imgs,modelTier:(G||st.mode==='help'||q.length>120||/code|lap trinh|lập trình|giải thích|bài toán|viết bài|dịch/i.test(q))?'complex':'default',onText:({text})=>{md(out,text);$('#chat').scrollTop=1e9}});
+    md(out,r.text);st.hist.push({r:'u',t:q},{r:'a',t:r.text});saveH();
+  }catch(e){
+    {const t=NA(q);out.textContent=t;st.hist.push({r:'u',t:q},{r:'a',t});saveH();st.engine='local';if(typeof upE==='function')upE()}
+  }
+  st.busy=false;$('#send').disabled=false;
+}
+init();
+</script>
+</body>
+</html>
